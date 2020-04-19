@@ -20,6 +20,9 @@ public class ProductsServiceImpl implements ProductsService {
         return productsRepository.findAll();
     }
 
+    @Override
+    public Product show(int productId) { return productsRepository.show(productId); }
+
     @Autowired
     public void setProductsRepository(ProductsRepository productsRepository) {
         this.productsRepository = productsRepository;
