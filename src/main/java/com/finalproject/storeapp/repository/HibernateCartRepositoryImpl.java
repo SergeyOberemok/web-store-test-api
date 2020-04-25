@@ -84,6 +84,8 @@ public class HibernateCartRepositoryImpl implements CartRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     cartProduct.setId(generatedKeys.getInt(1));
+
+                    return cartProduct;
                 } else {
                     throw new SQLException("Storing cart failed, no ID obtained");
                 }
@@ -92,7 +94,7 @@ public class HibernateCartRepositoryImpl implements CartRepository {
             System.err.println(error.getMessage());
         }
 
-        return cartProduct;
+        return null;
     }
 
     @Override
@@ -110,12 +112,14 @@ public class HibernateCartRepositoryImpl implements CartRepository {
         ) {
             if (statement.executeUpdate() == 0) {
                 throw new SQLException("Updating cart failed, no rows affected");
+            } else {
+                return cartProduct;
             }
         } catch (SQLException error) {
             System.err.println(error.getMessage());
         }
 
-        return cartProduct;
+        return null;
     }
 
     @Override

@@ -47,20 +47,18 @@ public class HibernateProductsRepositoryImpl implements ProductsRepository {
             return statement;
         };
 
-        Product product = null;
-
         try (
                 Connection connection = databaseConnection.getConnection();
                 PreparedStatement statement = createPrepareStatement.create(connection);
                 ResultSet resultSet = statement.executeQuery();
         ) {
             resultSet.next();
-            product = getProductFromRow(resultSet);
+            return getProductFromRow(resultSet);
         } catch (SQLException error) {
             System.err.println(error.getMessage());
         }
 
-        return product;
+        return null;
     }
 
     @Autowired
