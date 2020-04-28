@@ -15,10 +15,10 @@ public class HibernateUserRepositoryImpl implements UserRepository {
     private DatabaseConnection databaseConnection;
 
     @Override
-    public User fetch(User user) {
+    public User fetch(String email) {
         CreatePreparedStatement createPreparedStatement = (Connection connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sqlFetch);
-            preparedStatement.setString(1, user.getEmail());
+            preparedStatement.setString(1, email);
             return preparedStatement;
         };
 
@@ -36,7 +36,7 @@ public class HibernateUserRepositoryImpl implements UserRepository {
                     resultSet.getInt("id"),
                     resultSet.getString("email")
             );
-            userFromDb.setHashedPassword(resultSet.getString("password"));
+            userFromDb.setPassword(resultSet.getString("password"));
 
             return userFromDb;
         } catch (SQLException error) {

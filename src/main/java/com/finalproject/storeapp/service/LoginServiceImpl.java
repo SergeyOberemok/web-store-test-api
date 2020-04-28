@@ -11,13 +11,13 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public User authenticate(User user) {
-        User userFromDb = userRepository.fetch(user);
+        User userFromDb = userRepository.fetch(user.getEmail());
 
         if (userFromDb.getPassword().equals(user.getPassword())) {
             user.setId(userFromDb.getId());
         }
 
-        user.setHashedPassword("");
+        user.setPassword("");
         return user;
     }
 

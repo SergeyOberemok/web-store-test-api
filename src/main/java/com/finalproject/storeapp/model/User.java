@@ -34,9 +34,6 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = Integer.toString(password.hashCode());
+        this.password = password;
     }
-
-    public void setHashedPassword(String password) { this.password = password; }
-
 }

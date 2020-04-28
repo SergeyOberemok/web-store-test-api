@@ -12,7 +12,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public User register(User user) {
-        if (userRepository.fetch(user) != null) {
+        if (userRepository.fetch(user.getEmail()) != null) {
             return null;
         }
 
