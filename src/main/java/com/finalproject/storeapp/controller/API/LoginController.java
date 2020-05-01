@@ -13,7 +13,7 @@ public class LoginController {
 
     @PostMapping(path = "/api/login", consumes = "application/json", produces = "application/json")
     public User login(@RequestBody User user) {
-        return user;
+        return loginService.authenticate(user);
     }
 
     @Autowired

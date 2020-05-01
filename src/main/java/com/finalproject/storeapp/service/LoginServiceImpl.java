@@ -13,12 +13,19 @@ public class LoginServiceImpl implements LoginService {
     public User authenticate(User user) {
         User userFromDb = userRepository.fetch(user.getEmail());
 
-        if (userFromDb.getPassword().equals(user.getPassword())) {
-            user.setId(userFromDb.getId());
+        if (userFromDb == null) {
+            // TODO not found
+            return null;
         }
 
-        user.setPassword("");
-        return user;
+        if (userFromDb.getPassword().equals(user.getPassword())) {
+            user.setId(userFromDb.getId());
+
+            return user;
+        }
+
+        // TODO: password isn't equal
+        return null;
     }
 
     @Autowired
