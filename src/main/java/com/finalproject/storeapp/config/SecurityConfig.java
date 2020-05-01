@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @Configuration
 @EnableWebSecurity
-@ComponentScan("com.finalproject.storeapp.config.shared")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private CustomAuthenticationProvider authenticationProvider;
