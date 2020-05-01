@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 @Configuration
 @EnableWebSecurity
-@ComponentScan("com.finalproject.storeapp.config.shared")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private CustomAuthenticationProvider authenticationProvider;
@@ -33,8 +32,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider);
-        auth.inMemoryAuthentication()
-                .withUser("user").password("{noop}password").roles("USER");
+//        auth.inMemoryAuthentication()
+//                .withUser("user").password("{noop}password").roles("USER");
     }
 
     @Autowired
