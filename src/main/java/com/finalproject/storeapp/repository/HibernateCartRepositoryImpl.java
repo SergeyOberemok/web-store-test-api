@@ -16,6 +16,7 @@ import java.util.List;
 public class HibernateCartRepositoryImpl implements CartRepository {
     final static private String sqlFetchAll = "SELECT `cart`.`id` as cart_id, `cart`.`quantity`, `products`.* FROM `cart` INNER JOIN `products` ON `cart`.`product_id` = `products`.`id`";
     final static private String sqlFetch = "SELECT `cart`.`id` as cart_id, `cart`.`quantity`, `products`.* FROM `cart` INNER JOIN `products` ON `cart`.`product_id` = `products`.`id` WHERE `cart`.`id` = ?";
+    final static private String sqlFetchByProductId = "SELECT `cart`.`id` as cart_id, `cart`.`quantity`, `products`.* FROM `cart` INNER JOIN `products` ON `cart`.`product_id` = `products`.`id` WHERE `cart`.`product_id` = ?";
     final static private String sqlStore = "INSERT INTO `cart` (`quantity`, `product_id`, `user_id`) VALUES (?, ?, 1)";
     final static private String sqlUpdate = "UPDATE `cart` SET `quantity` = ? WHERE id = ?";
     final static private String sqlDestroy = "DELETE FROM `cart` WHERE id = ?";
@@ -53,6 +54,28 @@ public class HibernateCartRepositoryImpl implements CartRepository {
                 Connection connection = databaseConnection.getConnection();
                 PreparedStatement statement = createPreparedStatement.create(connection);
                 ResultSet resultSet = statement.executeQuery();
+        ) {
+            if (resultSet.next()) {
+                return getCartProductFromRow(resultSet);
+            }
+        } catch (SQLException error) {
+            System.err.println(error.getMessage());
+        }
+
+        return null;
+    }
+
+    @Override
+    public CartProduct showByProductId(int productId) {
+        CreatePreparedStatement createPreparedStatement = (Connection connection) -> {
+            PreparedStatement statement = connection.prepareStatement(sqlFetchByProductId);
+            statement.setInt(1, productId);
+            return statement;
+        };
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = createPreparedStatement.create(connection);
+             ResultSet resultSet = statement.executeQuery();
         ) {
             if (resultSet.next()) {
                 return getCartProductFromRow(resultSet);

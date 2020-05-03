@@ -23,15 +23,21 @@ public class CartController {
     @PostMapping(path = "/api/cart", consumes = "application/json", produces = "application/json")
     public CartProduct store(@RequestBody CartProduct cartProduct) {
         Product product = productsService.show(cartProduct.getProductId());
+        CartProduct cartProductFromDb = cartService.showByProductId(cartProduct.getProductId());
 
         if (product.getAvailable() < cartProduct.getQuantity() || cartProduct.getQuantity() == 0) {
             return null;
         }
 
+        if (cartProductFromDb != null) {
+            cartProductFromDb.setQuantity(cartProduct.getQuantity());
+            return cartService.update(cartProductFromDb);
+        }
+
         return cartService.store(cartProduct);
     }
 
-    @PutMapping(path = "/api/cart/{id}", consumes = "application/json", produces = "application/json")
+    @PatchMapping(path = "/api/cart/{id}", consumes = "application/json", produces = "application/json")
     public CartProduct update(@RequestBody CartProduct cartProduct, @PathVariable("id") String id) {
         CartProduct cartProductUpdated = cartService.show(Integer.parseInt(id));
 

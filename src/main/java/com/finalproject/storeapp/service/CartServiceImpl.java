@@ -26,6 +26,11 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public CartProduct showByProductId(int productId) {
+        return cartRepository.showByProductId(productId);
+    }
+
+    @Override
     public CartProduct store(CartProduct cartProduct) {
         return cartRepository.store(cartProduct);
     }

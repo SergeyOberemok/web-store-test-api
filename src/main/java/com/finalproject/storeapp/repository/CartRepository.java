@@ -9,6 +9,8 @@ public interface CartRepository {
 
     CartProduct show(int cartProductId);
 
+    CartProduct showByProductId(int productId);
+
     CartProduct store(CartProduct cartProduct);
 
     CartProduct update(CartProduct cartProduct);
