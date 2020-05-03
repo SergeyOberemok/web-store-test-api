@@ -13,8 +13,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public User register(User user) {
         if (userRepository.fetch(user.getEmail()) != null) {
-            // TODO: not unique error
-            return null;
+            throw new Error("EXISTING_USER");
         }
 
         return userRepository.store(user);

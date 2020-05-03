@@ -14,8 +14,7 @@ public class LoginServiceImpl implements LoginService {
         User userFromDb = userRepository.fetch(user.getEmail());
 
         if (userFromDb == null) {
-            // TODO not found
-            return null;
+            throw new Error("NOT_FOUND");
         }
 
         if (userFromDb.getPassword().equals(user.getPassword())) {
@@ -24,8 +23,7 @@ public class LoginServiceImpl implements LoginService {
             return user;
         }
 
-        // TODO: password isn't equal
-        return null;
+        throw new Error("PASSWORD_ISNT_EQUAL");
     }
 
     @Autowired
