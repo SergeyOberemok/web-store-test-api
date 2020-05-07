@@ -3,6 +3,7 @@ package com.finalproject.storeapp.repository;
 import com.finalproject.storeapp.model.User;
 import com.finalproject.storeapp.repository.shared.CreatePreparedStatement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
@@ -13,6 +14,7 @@ public class HibernateUserRepositoryImpl implements UserRepository {
     final static private String sqlStore = "INSERT INTO `users` (`email`, `password`) VALUES (?, ?)";
 
     private DatabaseConnection databaseConnection;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User fetch(String email) {
@@ -51,7 +53,7 @@ public class HibernateUserRepositoryImpl implements UserRepository {
         CreatePreparedStatement createPreparedStatement = (Connection connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStore, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, user.getEmail());
-            preparedStatement.setString(2, user.getPassword());
+            preparedStatement.setString(2, passwordEncoder.encode(user.getPassword()));
             return preparedStatement;
         };
 
@@ -82,5 +84,10 @@ public class HibernateUserRepositoryImpl implements UserRepository {
     @Autowired
     public void setDatabaseConnection(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 }
