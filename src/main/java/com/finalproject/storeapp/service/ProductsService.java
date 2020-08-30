@@ -8,5 +8,5 @@ public interface ProductsService {
 
     List<Product> findAll();
 
-    Product show(int productId);
+    Product show(long productId);
 }

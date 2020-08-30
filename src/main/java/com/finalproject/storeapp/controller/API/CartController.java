@@ -1,9 +1,9 @@
 package com.finalproject.storeapp.controller.API;
 
-import com.finalproject.storeapp.model.CartProduct;
+import com.finalproject.storeapp.model.Cart;
 import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.service.CartService;
-import com.finalproject.storeapp.service.ProductsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,74 +12,53 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CartController {
 
-    private CartService cartService;
-    private ProductsService productsService;
+    private final CartService cartService;
 
     @GetMapping("/api/cart")
-    public List<CartProduct> index() {
+    public List<Cart> index() {
         return cartService.findAll();
     }
 
     @PostMapping(path = "/api/cart", consumes = "application/json", produces = "application/json")
-    public CartProduct store(@RequestBody CartProduct cartProduct) {
-        Product product = productsService.show(cartProduct.getProductId());
+    public Cart store(@RequestBody Cart cart) {
+        Product product = cart.getProduct();
 
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
 
-        CartProduct cartProductFromDb = cartService.showByProductId(cartProduct.getProductId());
-
-        if (product.getAvailable() < cartProduct.getQuantity() || cartProduct.getQuantity() == 0) {
+        if (product.getAvailable() < cart.getQuantity() || cart.getQuantity() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity doesn't match criteria");
         }
 
-        if (cartProductFromDb != null) {
-            cartProductFromDb.setQuantity(cartProduct.getQuantity());
-            return cartService.update(cartProductFromDb);
-        }
-
-        return cartService.store(cartProduct);
+        return cartService.save(cart);
     }
 
     @PatchMapping(path = "/api/cart/{id}", consumes = "application/json", produces = "application/json")
-    public CartProduct update(@RequestBody CartProduct cartProduct, @PathVariable("id") String id) {
-        CartProduct cartProductUpdated = cartService.show(Integer.parseInt(id));
-        Product product = productsService.show(cartProduct.getProductId());
+    public Cart update(@RequestBody Cart cart, @PathVariable("id") String id) {
+        Cart cartUpdated = cartService.show(Integer.parseInt(id));
+        Product product = cart.getProduct();
 
-        if (cartProductUpdated == null || product == null) {
+        if (cartUpdated == null || product == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
         }
 
-        if (product.getAvailable() < cartProduct.getQuantity() || cartProduct.getQuantity() == 0) {
+        if (product.getAvailable() < cart.getQuantity() || cart.getQuantity() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity doesn't match criteria");
         }
 
-        cartProductUpdated.setQuantity(cartProduct.getQuantity());
+        cartUpdated.setQuantity(cart.getQuantity());
 
-        return cartService.update(cartProductUpdated);
+        return cartService.save(cartUpdated);
     }
 
     @DeleteMapping(path = "/api/cart/{id}", produces = "application/json")
     public int destroy(@PathVariable("id") String id) {
-        int deletedRows = cartService.destroy(Integer.parseInt(id));
+        cartService.delete(Long.parseLong(id));
 
-        if (deletedRows == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
-        }
-
-        return deletedRows;
-    }
-
-    @Autowired
-    public void setCartService(CartService cartService) {
-        this.cartService = cartService;
-    }
-
-    @Autowired
-    public void setProductsService(ProductsService productsService) {
-        this.productsService = productsService;
+        return 1;
     }
 }

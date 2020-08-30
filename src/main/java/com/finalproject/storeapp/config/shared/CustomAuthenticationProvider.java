@@ -2,6 +2,7 @@ package com.finalproject.storeapp.config.shared;
 
 import com.finalproject.storeapp.model.User;
 import com.finalproject.storeapp.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,15 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
-        User user = userRepository.fetch(name);
+        User user = userRepository.findOneByEmail(name).orElse(null);
 
         if (user != null && password.equals(user.getPassword())) {
             List<GrantedAuthority> authorities = new ArrayList<>();
@@ -38,10 +40,5 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?> authentication) {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
-    }
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
     }
 }

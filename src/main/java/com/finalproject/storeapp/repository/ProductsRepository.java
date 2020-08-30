@@ -1,12 +1,7 @@
 package com.finalproject.storeapp.repository;
 
 import com.finalproject.storeapp.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface ProductsRepository {
-
-    List<Product> findAll();
-
-    Product show(int productId);
+public interface ProductsRepository extends JpaRepository<Product, Long> {
 }

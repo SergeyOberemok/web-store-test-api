@@ -1,19 +1,15 @@
 package com.finalproject.storeapp.service;
 
-import com.finalproject.storeapp.model.CartProduct;
+import com.finalproject.storeapp.model.Cart;
 
 import java.util.List;
 
 public interface CartService {
-    List<CartProduct> findAll();
+    List<Cart> findAll();
 
-    CartProduct show(int cartProductId);
+    Cart show(long cartId);
 
-    CartProduct showByProductId(int productId);
+    Cart save(Cart cart);
 
-    CartProduct store(CartProduct cartProduct);
-
-    CartProduct update(CartProduct cartProduct);
-
-    int destroy(int cartProductId);
+    void delete(long cartId);
 }
