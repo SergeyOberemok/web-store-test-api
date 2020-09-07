@@ -4,9 +4,12 @@ import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.service.ProductsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController

@@ -1,7 +1,8 @@
 package com.finalproject.storeapp.controller.API;
 
+import com.finalproject.storeapp.core.exceptions.NotFoundException;
+import com.finalproject.storeapp.core.exceptions.OutOfRangeException;
 import com.finalproject.storeapp.model.Cart;
-import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,35 +25,16 @@ public class CartController {
 
     @PostMapping(path = "/api/cart", consumes = "application/json", produces = "application/json")
     public Cart store(@RequestBody Cart cart) {
-        Product product = cart.getProduct();
-
-        if (product == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
-        }
-
-        if (product.getAvailable() < cart.getQuantity() || cart.getQuantity() == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity doesn't match criteria");
-        }
-
-        return cartService.save(cart);
+        return saveCart(cart);
     }
 
     @PatchMapping(path = "/api/cart/{id}", consumes = "application/json", produces = "application/json")
     public Cart update(@RequestBody Cart cart, @PathVariable("id") String id) {
-        Cart cartUpdated = cartService.show(Integer.parseInt(id));
-        Product product = cart.getProduct();
+        Cart cartDb = cartService.show(Integer.parseInt(id));
 
-        if (cartUpdated == null || product == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
-        }
+        cartDb.setQuantity(cart.getQuantity());
 
-        if (product.getAvailable() < cart.getQuantity() || cart.getQuantity() == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity doesn't match criteria");
-        }
-
-        cartUpdated.setQuantity(cart.getQuantity());
-
-        return cartService.save(cartUpdated);
+        return saveCart(cartDb);
     }
 
     @DeleteMapping(path = "/api/cart/{id}", produces = "application/json")
@@ -60,5 +42,17 @@ public class CartController {
         cartService.delete(Long.parseLong(id));
 
         return 1;
+    }
+
+    private Cart saveCart(Cart cart) {
+        try {
+            return cartService.save(cart);
+        } catch (NotFoundException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        } catch (OutOfRangeException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity doesn't match criteria");
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+        }
     }
 }

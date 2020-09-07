@@ -1,6 +1,9 @@
 package com.finalproject.storeapp.service;
 
+import com.finalproject.storeapp.core.exceptions.NotFoundException;
+import com.finalproject.storeapp.core.exceptions.OutOfRangeException;
 import com.finalproject.storeapp.model.Cart;
+import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +33,17 @@ public class CartServiceImpl implements CartService {
 
     @Transactional
     @Override
-    public Cart save(Cart cart) {
+    public Cart save(Cart cart) throws Exception {
+        Product product = cart.getProduct();
+
+        if (product == null) {
+            throw new NotFoundException();
+        }
+
+        if (product.getAvailable() < cart.getQuantity() || cart.getQuantity() == 0) {
+            throw new OutOfRangeException();
+        }
+
         return cartRepository.save(cart);
     }
 

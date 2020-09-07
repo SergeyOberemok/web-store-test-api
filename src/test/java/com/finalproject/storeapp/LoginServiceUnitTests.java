@@ -1,5 +1,6 @@
 package com.finalproject.storeapp;
 
+import com.finalproject.storeapp.core.exceptions.NotFoundException;
 import com.finalproject.storeapp.model.User;
 import com.finalproject.storeapp.service.LoginService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ class LoginServiceUnitTests {
         AtomicReference<User> user = new AtomicReference<>();
 
         assertThatCode(() ->
-                user.set(this.loginService.authenticate(
+                user.set(loginService.authenticate(
                         new User("asdf@asdf", "asdfasdf")
                 ))
         ).doesNotThrowAnyException();
@@ -32,10 +33,10 @@ class LoginServiceUnitTests {
 
     @Test
     void authenticateFailureTest() {
-        Throwable throwable = catchThrowable(() -> this.loginService.authenticate(
+        Throwable throwable = catchThrowable(() -> loginService.authenticate(
                 new User("qwer@qwer", "qwerqwer")
         ));
 
-        assertThat(throwable).isInstanceOf(Exception.class).hasMessageContaining("NOT_FOUND");
+        assertThat(throwable).isInstanceOf(NotFoundException.class).hasMessageContaining("NOT_FOUND");
     }
 }

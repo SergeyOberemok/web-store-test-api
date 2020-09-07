@@ -1,4 +1,4 @@
-package com.finalproject.storeapp.core;
+package com.finalproject.storeapp.core.exceptions;
 
 public class ExistingUserException extends Exception {
     public ExistingUserException() {

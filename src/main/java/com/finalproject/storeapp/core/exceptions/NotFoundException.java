@@ -1,4 +1,4 @@
-package com.finalproject.storeapp.core;
+package com.finalproject.storeapp.core.exceptions;
 
 public class NotFoundException extends Exception {
     public NotFoundException() {

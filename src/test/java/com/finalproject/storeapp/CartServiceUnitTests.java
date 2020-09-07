@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -26,19 +28,19 @@ class CartServiceUnitTests {
 
     @Test
     void findAll() {
-        List<Cart> cartList = this.cartService.findAll();
+        List<Cart> cartList = cartService.findAll();
 
         assertThat(cartList.size()).isGreaterThan(0);
     }
 
     @Test
     void show() {
-        List<Cart> cartList = this.cartService.findAll();
+        List<Cart> cartList = cartService.findAll();
 
         assertThat(cartList.size()).isGreaterThan(0);
 
         Cart firstCart = cartList.get(0);
-        Cart cart = this.cartService.show(firstCart.getId());
+        Cart cart = cartService.show(firstCart.getId());
 
         assertThat(cart).isNotNull();
         assertThat(cart.getId()).isEqualTo(firstCart.getId());
@@ -46,11 +48,11 @@ class CartServiceUnitTests {
 
     @Test
     void save() {
-        User user = this.userRepository.findOneByEmail("asdf@asdf").orElse(null);
+        User user = userRepository.findOneByEmail("asdf@asdf").orElse(null);
 
         assertThat(user).isNotNull();
 
-        List<Product> productList = this.productsService.findAll();
+        List<Product> productList = productsService.findAll();
 
         assertThat(productList.size()).isGreaterThan(0);
 
@@ -60,16 +62,18 @@ class CartServiceUnitTests {
         cartToSave.setProduct(product);
         cartToSave.setUser(user);
 
-        Cart cart = this.cartService.save(cartToSave);
+        AtomicReference<Cart> cart = new AtomicReference<>();
 
-        assertThat(cart.getId()).isGreaterThan(0);
-        assertThat(cart.getQuantity()).isEqualTo(cartToSave.getQuantity());
-        assertThat(cart.getProduct().getId()).isEqualTo(product.getId());
+        assertThatCode(() -> cart.set(cartService.save(cartToSave))).doesNotThrowAnyException();
+
+        assertThat(cart.get().getId()).isGreaterThan(0);
+        assertThat(cart.get().getQuantity()).isEqualTo(cartToSave.getQuantity());
+        assertThat(cart.get().getProduct().getId()).isEqualTo(product.getId());
     }
 
     @Test
     void delete() {
-        List<Cart> cartList = this.cartService.findAll();
+        List<Cart> cartList = cartService.findAll();
 
         assertThat(cartList.size()).isGreaterThan(0);
 
@@ -77,6 +81,6 @@ class CartServiceUnitTests {
 
         cartService.delete(cart.getId());
 
-        assertThat(this.cartService.show(cart.getId())).isNull();
+        assertThat(cartService.show(cart.getId())).isNull();
     }
 }

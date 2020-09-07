@@ -1,6 +1,6 @@
 package com.finalproject.storeapp.controller.API;
 
-import com.finalproject.storeapp.core.ExistingUserException;
+import com.finalproject.storeapp.core.exceptions.ExistingUserException;
 import com.finalproject.storeapp.model.User;
 import com.finalproject.storeapp.service.RegisterService;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ public class RegisterController {
     public User register(@RequestBody User user) {
         try {
             return registerService.register(user);
-        } catch (ExistingUserException error) {
+        } catch (ExistingUserException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
-        } catch (Exception error) {
+        } catch (Exception exception) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
         }
     }

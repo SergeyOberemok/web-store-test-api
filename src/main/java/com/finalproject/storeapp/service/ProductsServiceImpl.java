@@ -24,4 +24,14 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public Product show(long productId) { return productsRepository.findById(productId).orElse(null); }
+
+    @Override
+    public Product save(Product product) throws Exception {
+        return productsRepository.save(product);
+    }
+
+    @Override
+    public void delete(long productId) {
+        productsRepository.deleteById(productId);
+    }
 }

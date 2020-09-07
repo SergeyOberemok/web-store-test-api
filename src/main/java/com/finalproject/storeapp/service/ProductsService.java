@@ -9,4 +9,8 @@ public interface ProductsService {
     List<Product> findAll();
 
     Product show(long productId);
+
+    Product save(Product product) throws Exception;
+
+    void delete(long productId);
 }

@@ -9,7 +9,7 @@ public interface CartService {
 
     Cart show(long cartId);
 
-    Cart save(Cart cart);
+    Cart save(Cart cart) throws Exception;
 
     void delete(long cartId);
 }
