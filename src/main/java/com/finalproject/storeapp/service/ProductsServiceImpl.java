@@ -1,5 +1,6 @@
 package com.finalproject.storeapp.service;
 
+import com.finalproject.storeapp.core.exceptions.NotFoundException;
 import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.repository.ProductsRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,9 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public Product show(long productId) { return productsRepository.findById(productId).orElse(null); }
+    public Product show(long productId) throws Exception {
+        return productsRepository.findById(productId).orElseThrow(NotFoundException::new);
+    }
 
     @Override
     public Product save(Product product) throws Exception {

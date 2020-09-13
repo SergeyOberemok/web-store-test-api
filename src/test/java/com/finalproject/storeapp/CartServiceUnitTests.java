@@ -1,5 +1,6 @@
 package com.finalproject.storeapp;
 
+import com.finalproject.storeapp.core.exceptions.NotFoundException;
 import com.finalproject.storeapp.model.Cart;
 import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.model.User;
@@ -7,16 +8,15 @@ import com.finalproject.storeapp.repository.UserRepository;
 import com.finalproject.storeapp.service.CartService;
 import com.finalproject.storeapp.service.ProductsService;
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -28,39 +28,36 @@ class CartServiceUnitTests {
 
     @Test
     void findAll() {
-        List<Cart> cartList = cartService.findAll();
+        List<Cart> cartList = cartService.findAll(getUser());
 
         assertThat(cartList.size()).isGreaterThan(0);
     }
 
     @Test
     void show() {
-        List<Cart> cartList = cartService.findAll();
+        List<Cart> cartList = cartService.findAll(getUser());
 
         assertThat(cartList.size()).isGreaterThan(0);
 
         Cart firstCart = cartList.get(0);
-        Cart cart = cartService.show(firstCart.getId());
+        AtomicReference<Cart> cart = new AtomicReference<>();
 
-        assertThat(cart).isNotNull();
-        assertThat(cart.getId()).isEqualTo(firstCart.getId());
+        assertThatCode(() -> cart.set(cartService.show(firstCart.getId()))).doesNotThrowAnyException();
+
+        assertThat(cart.get().getId()).isEqualTo(firstCart.getId());
     }
 
     @Test
     void save() {
-        User user = userRepository.findOneByEmail("asdf@asdf").orElse(null);
-
-        assertThat(user).isNotNull();
-
         List<Product> productList = productsService.findAll();
 
         assertThat(productList.size()).isGreaterThan(0);
 
         Product product = productList.get(0);
         Cart cartToSave = new Cart();
-        cartToSave.setQuantity(2);
+        cartToSave.setQuantity(ThreadLocalRandom.current().nextInt(1, product.getAvailable()));
         cartToSave.setProduct(product);
-        cartToSave.setUser(user);
+        cartToSave.setUser(getUser());
 
         AtomicReference<Cart> cart = new AtomicReference<>();
 
@@ -71,9 +68,11 @@ class CartServiceUnitTests {
         assertThat(cart.get().getProduct().getId()).isEqualTo(product.getId());
     }
 
+    // TODO: add patch test
+
     @Test
     void delete() {
-        List<Cart> cartList = cartService.findAll();
+        List<Cart> cartList = cartService.findAll(getUser());
 
         assertThat(cartList.size()).isGreaterThan(0);
 
@@ -81,6 +80,31 @@ class CartServiceUnitTests {
 
         cartService.delete(cart.getId());
 
-        assertThat(cartService.show(cart.getId())).isNull();
+        Throwable throwable = catchThrowable(() -> cartService.show(cart.getId()));
+
+        assertThat(throwable).isInstanceOf(NotFoundException.class).hasMessageContaining("NOT_FOUND");
+    }
+
+    @Test
+    void checkout() {
+        User user = getUser();
+
+        assertThatCode(() -> cartService.checkout(user)).doesNotThrowAnyException();
+
+        List<Cart> cartList = cartService.findAll(user);
+
+        assertThat(cartList.size()).isEqualTo(0);
+
+    }
+
+
+    private User getUser() {
+        AtomicReference<User> user = new AtomicReference<>();
+
+        assertThatCode(() -> user.set(
+                userRepository.findOneByEmail("asdf@asdf").orElseThrow(NotFoundException::new)
+        )).doesNotThrowAnyException();
+
+        return user.get();
     }
 }

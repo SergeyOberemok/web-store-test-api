@@ -3,6 +3,7 @@ package com.finalproject.storeapp.controller.API;
 import com.finalproject.storeapp.core.exceptions.NotFoundException;
 import com.finalproject.storeapp.core.exceptions.OutOfRangeException;
 import com.finalproject.storeapp.model.Cart;
+import com.finalproject.storeapp.model.User;
 import com.finalproject.storeapp.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
@@ -17,10 +19,13 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
+    private final HttpSession httpSession;
 
     @GetMapping("/api/cart")
     public List<Cart> index() {
-        return cartService.findAll();
+        User user = (User) httpSession.getAttribute("authUser");
+
+        return cartService.findAll(user);
     }
 
     @PostMapping(path = "/api/cart", consumes = "application/json", produces = "application/json")
@@ -30,18 +35,37 @@ public class CartController {
 
     @PatchMapping(path = "/api/cart/{id}", consumes = "application/json", produces = "application/json")
     public Cart update(@RequestBody Cart cart, @PathVariable("id") String id) {
-        Cart cartDb = cartService.show(Integer.parseInt(id));
+        Cart cartDb;
 
-        cartDb.setQuantity(cart.getQuantity());
+        try {
+            cartDb = cartService.show(Integer.parseInt(id));
+
+            cartDb.setQuantity(cart.getQuantity());
+        } catch (NotFoundException exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+        }
 
         return saveCart(cartDb);
     }
 
     @DeleteMapping(path = "/api/cart/{id}", produces = "application/json")
-    public int destroy(@PathVariable("id") String id) {
+    public void destroy(@PathVariable("id") String id) {
         cartService.delete(Long.parseLong(id));
+    }
 
-        return 1;
+    @PostMapping(path = "/api/cart/checkout", consumes = "application/json", produces = "application/json")
+    public void checkout() {
+        User user = (User) httpSession.getAttribute("authUser");
+
+        try {
+            cartService.checkout(user);
+        } catch (OutOfRangeException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity doesn't match criteria");
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+        }
     }
 
     private Cart saveCart(Cart cart) {

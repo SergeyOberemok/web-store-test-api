@@ -1,5 +1,6 @@
 package com.finalproject.storeapp;
 
+import com.finalproject.storeapp.core.exceptions.NotFoundException;
 import com.finalproject.storeapp.model.Product;
 import com.finalproject.storeapp.model.User;
 import com.finalproject.storeapp.repository.UserRepository;
@@ -13,8 +14,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -34,10 +34,11 @@ class ProductsServiceUnitTests {
     @Test
     void show() {
         long id = 1;
-        Product product = productsService.show(id);
+        AtomicReference<Product> product = new AtomicReference<>();
 
-        assertThat(product).isNotNull();
-        assertThat(product.getId()).isEqualTo(id);
+        assertThatCode(() -> product.set(productsService.show(id))).doesNotThrowAnyException();
+
+        assertThat(product.get().getId()).isEqualTo(id);
     }
 
     @Test
@@ -67,6 +68,8 @@ class ProductsServiceUnitTests {
 
         productsService.delete(product.getId());
 
-        assertThat(productsService.show(product.getId())).isNull();
+        Throwable throwable = catchThrowable(() -> productsService.show(product.getId()));
+
+        assertThat(throwable).isInstanceOf(NotFoundException.class).hasMessageContaining("NOT_FOUND");
     }
 }

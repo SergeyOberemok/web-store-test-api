@@ -8,7 +8,7 @@ public interface ProductsService {
 
     List<Product> findAll();
 
-    Product show(long productId);
+    Product show(long productId) throws Exception;
 
     Product save(Product product) throws Exception;
 
