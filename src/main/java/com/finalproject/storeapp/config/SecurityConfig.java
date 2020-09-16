@@ -15,9 +15,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.session.MapSessionRepository;
+import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @EnableWebSecurity
+@EnableSpringHttpSession
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -28,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/api/login", "/api/register", "/dist/**").permitAll()
+                .antMatchers("/", "/api/login", "/api/register", "/storeapp-content/**").permitAll()
                 .antMatchers("/api/products/**", "/api/cart/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
@@ -55,5 +62,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManager();
+    }
+
+    @Bean
+    public MapSessionRepository sessionRepository() {
+        return new MapSessionRepository(new ConcurrentHashMap<>());
+    }
+
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setCookieName("JSESSIONID");
+        serializer.setCookiePath("/");
+        return serializer;
     }
 }

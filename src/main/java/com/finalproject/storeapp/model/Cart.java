@@ -1,5 +1,6 @@
 package com.finalproject.storeapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class Cart {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

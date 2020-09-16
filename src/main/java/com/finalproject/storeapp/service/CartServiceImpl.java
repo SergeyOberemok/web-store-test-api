@@ -40,10 +40,6 @@ public class CartServiceImpl implements CartService {
     public Cart save(Cart cart) throws Exception {
         Product product = cart.getProduct();
 
-        if (product == null) {
-            throw new NotFoundException();
-        }
-
         if (product.getAvailable() < cart.getQuantity() || cart.getQuantity() == 0) {
             throw new OutOfRangeException();
         }
@@ -66,20 +62,16 @@ public class CartServiceImpl implements CartService {
             return;
         }
 
-        List<Product> productList = new ArrayList<>();
-
         for (Cart cart : cartList) {
             Product product = cart.getProduct();
 
             if (product.getAvailable() >= cart.getQuantity()) {
                 product.setAvailable(product.getAvailable() - cart.getQuantity());
-                productList.add(product);
+                productsRepository.save(product);
+                cartRepository.deleteById(cart.getId());
             } else {
                 throw new OutOfRangeException();
             }
         }
-
-        productList.forEach((productsRepository::save));
-        cartRepository.deleteAllByUserId(user.getId());
     }
 }
